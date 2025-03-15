@@ -1,7 +1,7 @@
 import "reflect-metadata"
 import { Model } from "../models"
 import { Serializer } from "../serializers"
-import { getError, ValidateErrorType, Validator } from "../validators"
+import { ValidateErrorType, Validator } from "../validators"
 
 export type FieldType<T, OptsT> = {
   new (): Field<T> & { init: (options?: OptsT) => void }
@@ -99,8 +99,8 @@ export class Field<T = any> implements Serializer {
       throw new Error("Value cannot be null")
     }
     for (const validator of [...(this.constructor as typeof Field).defaultValidators, ...(this.validators || [])]) {
-      const error = getError(validator(value, this))
-      if (error !== undefined) return error
+      const trueOrError = validator(value, this)
+      if (trueOrError !== true) return trueOrError
     }
   }
 

@@ -1,8 +1,9 @@
 {
   "name": "@hmeqo/easymodel",
-  "version": "0.1.0-beta.2",
+  "version": "0.1.0-beta.3",
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "tag": "next"
   },
   "description": "Easily define your data models use decorator.",
   "main": "./dist/index.js",
@@ -56,7 +57,10 @@
     "lint:prettier": "prettier src --check",
     "format": "prettier --write src"
   },
-  "keywords": [],
+  "keywords": [
+    "data",
+    "model"
+  ],
   "author": "hmeqo",
   "license": "MIT",
   "repository": {
@@ -67,9 +71,7 @@
     "date-fns-tz": "^3.1.3",
     "decimal.js": "^10.4.3",
     "lodash": "^4.17.21",
-    "msw": "^2.3.5",
-    "reflect-metadata": "^0.2.2",
-    "string-format": "^2.0.0"
+    "reflect-metadata": "^0.2.2"
   },
   "devDependencies": {
     "@eslint/compat": "^1.1.1",

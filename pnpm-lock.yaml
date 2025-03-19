@@ -39,9 +39,6 @@ importers:
       '@types/node':
         specifier: ^20.14.14
         version: 20.14.14
-      '@types/string-format':
-        specifier: ^2.0.3
-        version: 2.0.3
       cross-env:
         specifier: ^7.0.3
         version: 7.0.3
@@ -1483,9 +1480,6 @@ packages:
 
   '@types/stack-utils@2.0.3':
     resolution: {integrity: sha512-9aEbYZ3TbYMznPdcdr3SmIrLXwC/AKZXQeCf9Pgao5CKb8CyHuEX5jzWPTkvregvhRJHcpRO6BFoGW9ycaOkYw==}
-
-  '@types/string-format@2.0.3':
-    resolution: {integrity: sha512-2BuDXYaQvSZR5XHlLJQ3KQ455NW+C1Mok0uOO6q8bnp97V/gtZbDEYy44kmu5Ng1U8wRtCSF/leREYVmH2vYmQ==}
 
   '@types/yargs-parser@21.0.3':
     resolution: {integrity: sha512-I4q9QU9MQv4oEOz4tAHJtNz1cwuLxn2F3xcc2iV5WdqLPpUnj30aUuxt1mAxYTG+oe8CZMV/+6rU4S4gRDzqtQ==}
@@ -6293,8 +6287,6 @@ snapshots:
   '@types/resolve@1.20.2': {}
 
   '@types/stack-utils@2.0.3': {}
-
-  '@types/string-format@2.0.3': {}
 
   '@types/yargs-parser@21.0.3': {}
 

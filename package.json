@@ -1,9 +1,9 @@
 {
   "name": "@hmeqo/easymodel",
-  "version": "0.1.0-beta.4",
+  "version": "0.1.0-beta.5",
   "publishConfig": {
     "access": "public",
-    "tag": "next"
+    "tag": "latest"
   },
   "description": "Easily define your data models use decorator.",
   "type": "module",

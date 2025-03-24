@@ -74,7 +74,7 @@ export class Model extends BaseModel {
 
   declare errors?: Record<string, any>
 
-  static override init<T extends Model>(this: new () => T, data?: ModelData<T>) {
+  static override init<T extends Model>(this: { new (): T }, data?: ModelData<T>) {
     const inst = new this()
     for (const [name, field] of Object.entries((this as unknown as typeof Model).fields)) {
       if ((inst as any)[name] === undefined) (inst as any)[name] = field.default
@@ -112,7 +112,7 @@ export class Model extends BaseModel {
   }
 
   static exclude<ThisT, KeyT extends keyof ThisT = keyof ThisT>(
-    this: new () => ThisT,
+    this: { new (): ThisT },
     ...fields: KeyT[]
   ): ModelType<Omit<ThisT, KeyT>, typeof Model> {
     const ModelClass = this as unknown as typeof Model
@@ -122,7 +122,7 @@ export class Model extends BaseModel {
   }
 
   static include<ThisT, Fields extends Record<string, Field>>(
-    this: new () => ThisT,
+    this: { new (): ThisT },
     fields: Fields
   ): ModelType<Omit<ThisT, keyof Fields> & UnwrapFields<Fields>, typeof Model> {
     const ModelClass = this as unknown as typeof Model
@@ -152,7 +152,7 @@ export class ModelSet<T extends BaseModel = BaseModel> extends Array<T> implemen
   declare static model: ModelType
   declare errors?: ValidateErrorType[]
 
-  static init<T extends ModelSet>(this: new () => T, data?: any[]) {
+  static init<T extends ModelSet>(this: { new (): T }, data?: any[]) {
     const inst = new this()
     if (data) inst.push(...((this as unknown as typeof ModelSet).toInternalValue(data) as T[]))
     return inst
@@ -196,9 +196,9 @@ export class ModelSet<T extends BaseModel = BaseModel> extends Array<T> implemen
     }
   }
 
-  static fromModel<T extends BaseModel>(model: new () => T) {
+  static fromModel<T extends BaseModel>(model: { new (): T }) {
     return class extends ModelSet<T> {
-      static model = model as ModelType
-    }
+      static override model = model as ModelType
+    } as typeof ModelSet<T> & { model: ModelType }
   }
 }

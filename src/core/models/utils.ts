@@ -1,5 +1,5 @@
 import { getConstructor } from "@/utils"
-import { cloneDeep } from "lodash"
+import cloneDeep from "lodash/cloneDeep.js"
 import { BaseModel, Model, ModelSet } from "./base"
 
 export function cloneModel<T>(model: T): T {

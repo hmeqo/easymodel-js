@@ -8,10 +8,6 @@ export function cloneModel<T>(model: T): T {
   return newObj as T
 }
 
-export function isModel(model: any): boolean {
-  return model instanceof Model || model instanceof ModelSet
-}
-
 export function modelToRaw<T = any>(model: BaseModel): T {
   if (model instanceof ModelSet) {
     return model.map((x) => modelToRaw(x)) as T
@@ -19,7 +15,7 @@ export function modelToRaw<T = any>(model: BaseModel): T {
   const rawObj: Record<string, unknown> = {}
   for (const k in getConstructor<typeof Model>(model).fields) {
     const value = model[k as keyof typeof model]
-    if (isModel(value)) rawObj[k] = modelToRaw(value)
+    if (value.fields) rawObj[k] = modelToRaw(value)
     else rawObj[k] = value
   }
   return rawObj as T

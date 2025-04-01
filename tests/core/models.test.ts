@@ -1,4 +1,4 @@
-import { IntegerField, isModel, modelToRaw, StringField } from "@/index"
+import { IntegerField, Model, ModelSet, modelToRaw, StringField } from "@/index"
 import { User, UserSet } from "./models"
 
 test("Test Model", () => {
@@ -20,6 +20,8 @@ test("Test Model", () => {
   }
   expect(NewUser.init().nickname.toLowerCase()).toEqual("nickname")
   expect(NewUser.init().toRepresentation()).toEqual({ name: "", age: "998", nickname: "Nickname", subscribe: [] })
+
+  expect(Model.isModel(user)).toBe(true)
 })
 
 test("Test ModelSet", () => {
@@ -29,12 +31,13 @@ test("Test ModelSet", () => {
   expect(UserSet.model).toEqual(User)
   expect(userList[0]).toStrictEqual(user)
   userList.forEach((x) => expect(x).toBeInstanceOf(User))
+
+  expect(ModelSet.isModel(userList)).toBe(true)
 })
 
 test("Test Model Utils", () => {
   const obj = User.init({ name: "Eugene Reese" })
 
-  expect(isModel(User.init())).toEqual
   expect(modelToRaw(obj).name).toEqual("Eugene Reese")
   expect(modelToRaw(obj).age).toEqual(999)
 })

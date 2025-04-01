@@ -69,7 +69,7 @@ export class ModelBranch<T extends BaseModel> {
   }
 }
 
-type Branch<T extends BaseModel> = T & ModelBranch<T>
+export type Branch<T extends BaseModel> = T & ModelBranch<T>
 
 /**
  * Creates a new branch based on the given model.

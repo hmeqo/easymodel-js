@@ -2,7 +2,9 @@ import { useBranch } from "@/index"
 import { User } from "./models"
 
 test("Test Wrappers", () => {
-  const user = useBranch(User.init({ name: "John" }))
+  const oUser = User.init({ name: "John" })
+
+  const user = useBranch(oUser)
 
   user.name = "John Doe"
   expect(user.name).toEqual("John Doe")
@@ -15,12 +17,13 @@ test("Test Wrappers", () => {
   user.$rollback()
   expect(user.name).toEqual("Bob")
 
-  const user2 = user.$subBranch()
+  const user2 = user.$newBranch()
   user2.name = "Ethan"
   expect(user.name).toEqual("Bob")
   expect(user2.name).toEqual("Ethan")
-  user2.$push()
+  user2.$apply()
   expect(user.name).toEqual("Ethan")
+  expect(oUser.name).toEqual("Ethan")
 
   const user3 = user.$copy()
   user3.name = "Tom"

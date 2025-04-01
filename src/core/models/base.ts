@@ -55,6 +55,13 @@ export class BaseModel {
     this.errors = this.runValidators()
     return !Object.keys(this.errors ?? {}).length
   }
+
+  /**
+   * Checks if the given value is a model.
+   */
+  static isModel(value: any): value is BaseModel {
+    return !!value.toRepresentation
+  }
 }
 
 export type UnwrapFields<T> = { [K in keyof T]: T[K] extends Field<infer Type> ? Type : T[K] }
@@ -200,5 +207,9 @@ export class ModelSet<T extends BaseModel = BaseModel> extends Array<T> implemen
     return class extends ModelSet<T> {
       static override model = model as ModelType
     } as typeof ModelSet<T> & { model: ModelType }
+  }
+
+  static isModel(value: any): value is BaseModel {
+    return !!value.toRepresentation
   }
 }

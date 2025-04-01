@@ -1,4 +1,5 @@
 import { BaseModel, cloneModel } from "@/index"
+import { merge } from "lodash"
 
 /**
  * The `ModelBranch` class represents a branch of data in a model.
@@ -31,7 +32,7 @@ export class ModelBranch<T extends BaseModel> {
    * Resets the model instance using the provided data.
    */
   $resetFrom(model: T) {
-    this.$model = cloneModel(model)
+    Object.assign(this.$model, cloneModel(model))
   }
 
   /**
@@ -48,7 +49,7 @@ export class ModelBranch<T extends BaseModel> {
   /**
    * Creates a new branch based on this branch.
    */
-  $subBranch() {
+  $newBranch() {
     const newBranch = useBranch<T>(cloneModel(this.$model))
     newBranch.$master = this
     return newBranch
@@ -58,14 +59,14 @@ export class ModelBranch<T extends BaseModel> {
    */
   $merge(other: ModelBranch<T>, opts?: { chain?: boolean }) {
     this.$resetFrom(other.$model)
-    if (opts?.chain) this.$push({ chain: true })
+    if (opts?.chain) this.$apply(opts)
   }
 
   /**
-   * Commits the changes to the master branch.
+   * Applies the changes in this branch to the master branch.
    */
-  $push(opts?: { chain?: boolean }) {
-    this.$master?.$merge(this, opts)
+  $apply(opts?: { chain?: boolean }) {
+    this.$master?.$merge(this, merge({ chain: true }, opts))
   }
 }
 

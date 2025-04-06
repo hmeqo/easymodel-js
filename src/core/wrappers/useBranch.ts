@@ -39,11 +39,9 @@ export class ModelBranch<T extends BaseModel> {
    * Creates a copy of this branch, including its default data and master branch.
    */
   $copy() {
-    // const newBranch = useBranch<T>((this.$model.constructor as typeof BaseModel).init(this.$model))
-    // newBranch.$defaultData = deepcopy(this.$defaultData)
-    // newBranch.$master = this.$master
-    // return newBranch
-    return cloneModel(this)
+    const newBranch = useBranch<T>(cloneModel(this.$model))
+    newBranch.$master = this.$master
+    return newBranch
   }
 
   /**

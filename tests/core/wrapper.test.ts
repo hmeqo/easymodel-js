@@ -27,6 +27,12 @@ test("Test Wrappers", () => {
 
   const user3 = user.$copy()
   user3.name = "Tom"
+  console.log(user3)
   expect(user.name).toEqual("Ethan")
   expect(user3.name).toEqual("Tom")
+  expect(user3.$model.name).toEqual("Tom")
+
+  Object.assign(user3, { name: "Bob" })
+  expect(user3.name).toEqual("Bob")
+  expect(user3.$model.name).toEqual("Bob")
 })

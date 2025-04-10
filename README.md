@@ -24,12 +24,13 @@ Add `experimentalDecorators` and `emitDecoratorMetadata` to your `tsconfig.json`
 Define a base model, is clear and is easy to use:
 
 ```ts
-import { Model, dateTimeField, integerField, stringField } from "@hmeqo/easymodel"
+import { Model, dateField, integerField, stringField } from "@hmeqo/easymodel"
+import dayjs from 'dayjs'
 
 class User extends Model {
   @stringField name: string = ""
   @integerField age!: number
-  @dateTimeField createdAt!: Date
+  @dateField createdAt!: dayjs.Dayjs
 }
 
 class UserSet extends User.modelSet() {}

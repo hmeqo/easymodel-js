@@ -1,4 +1,4 @@
-import { IntegerField, Model, ModelSet, modelToRaw, StringField } from "@/index"
+import { IntegerField, isModel, Model, ModelSet, modelToRaw, StringField } from "@/index"
 import { User, UserSet } from "./models"
 
 test("Test Model", () => {
@@ -8,7 +8,7 @@ test("Test Model", () => {
     name: "Eugene Reese",
     age: 999,
     email: "",
-    created_at: expect.stringMatching(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}/)
+    created_at: expect.stringMatching(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}[+-]\d{2}:\d{2}Z/)
   })
 
   class NewUser extends User.exclude("id", "email", "created_at").include({
@@ -22,6 +22,7 @@ test("Test Model", () => {
   expect(NewUser.init().toRepresentation()).toEqual({ name: "", age: "998", nickname: "Nickname", subscribe: [] })
 
   expect(Model.isModel(user)).toBe(true)
+  expect(isModel(user)).toBe(true)
 })
 
 test("Test ModelSet", () => {
@@ -33,6 +34,7 @@ test("Test ModelSet", () => {
   userList.forEach((x) => expect(x).toBeInstanceOf(User))
 
   expect(ModelSet.isModel(userList)).toBe(true)
+  expect(isModel(userList)).toBe(true)
 })
 
 test("Test Model Utils", () => {

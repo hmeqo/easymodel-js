@@ -1,4 +1,4 @@
-import { ValidateErrorType } from "@/index"
+import { ValidateErrorType } from "../validators"
 
 export class Serializer {
   toInternalValue(data: unknown): unknown {

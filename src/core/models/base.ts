@@ -1,6 +1,8 @@
 import { NotImplementedError, assert_ok } from "@/errors"
-import { Field, Serializer, ValidateErrorType } from "@/index"
-import { assign } from "@/utils"
+import { Field } from "../fields"
+import { Serializer } from "../serializers"
+import { ValidateErrorType } from "../validators"
+import { assignModel, isModel } from "./utils"
 
 export type ModelType<T = any, Base extends typeof BaseModel = typeof BaseModel> = Omit<Base, "init"> & {
   new (): T
@@ -56,11 +58,8 @@ export class BaseModel {
     return !Object.keys(this.errors ?? {}).length
   }
 
-  /**
-   * Checks if the given value is a model.
-   */
-  static isModel(value: any): value is BaseModel {
-    return !!value.toRepresentation
+  static isModel(obj: any): obj is BaseModel {
+    return isModel(obj)
   }
 }
 
@@ -86,7 +85,7 @@ export class Model extends BaseModel {
     for (const [name, field] of Object.entries((this as unknown as typeof Model).fields)) {
       if ((inst as any)[name] === undefined) (inst as any)[name] = field.default
     }
-    if (data) assign(inst, (this as unknown as typeof Model).toInternalValue(data))
+    if (data) assignModel(inst, data)
     return inst
   }
 
@@ -150,6 +149,10 @@ export class Model extends BaseModel {
     this.errors = this.runValidators()
     return !Object.keys(this.errors ?? {}).length
   }
+
+  static isModel(obj: any): obj is Model {
+    return isModel(obj)
+  }
 }
 
 /**
@@ -209,7 +212,7 @@ export class ModelSet<T extends BaseModel = BaseModel> extends Array<T> implemen
     } as typeof ModelSet<T> & { model: ModelType }
   }
 
-  static isModel(value: any): value is BaseModel {
-    return !!value.toRepresentation
+  static isModel(obj: any): obj is ModelSet {
+    return isModel(obj)
   }
 }

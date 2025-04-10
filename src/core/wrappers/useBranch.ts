@@ -1,5 +1,5 @@
-import { BaseModel, cloneModel } from "@/index"
 import { merge } from "lodash"
+import { BaseModel, cloneModel } from "../models"
 
 /**
  * The `ModelBranch` class represents a branch of data in a model.

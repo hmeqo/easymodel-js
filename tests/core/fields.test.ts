@@ -1,15 +1,19 @@
 import {
   booleanField,
-  DateTimeField,
-  dateTimeField,
+  dateField,
+  DateField,
   enumField,
   EnumField,
   floatField,
   integerField,
   Model,
-  stringField
+  stringField,
+  TimestampField,
+  timestampField
 } from "@/core"
 import { IntegerField, StringField } from "@/index"
+import dayjs from "dayjs"
+import { datePattern, datetimePattern } from "./models"
 
 test("Test EnumStringField", () => {
   class Test extends Model {
@@ -59,10 +63,22 @@ test("Test EnumField", () => {
   expect(Test.init()).toEqual({ te: TE.A })
 })
 
-test("Test DateTimeField", () => {
+test("Test TimestampField and DateField", () => {
   class Test extends Model {
-    @dateTimeField datetime!: Date
+    @timestampField timestamp!: number
+    @dateField datetime!: dayjs.Dayjs
+    @dateField({ format: "date" }) date!: dayjs.Dayjs
   }
-  const field = Test.fields.datetime as DateTimeField
-  expect(field.toRepresentation(field.default)).toMatch(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}/)
+
+  const field1 = Test.fields.timestamp as TimestampField
+  const field2 = Test.fields.datetime as DateField
+  const field3 = Test.fields.date as DateField
+
+  expect(typeof field1.default).toEqual("number")
+  expect(typeof field2.default).toEqual("object")
+  expect(typeof field3.default).toEqual("object")
+
+  expect(field1.toRepresentation(field1.default)).toMatch(datetimePattern)
+  expect(field2.toRepresentation(field2.default)).toMatch(datetimePattern)
+  expect(field3.toRepresentation(field3.default)).toMatch(datePattern)
 })

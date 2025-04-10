@@ -1,7 +1,9 @@
 import { assert_ok, throwError } from "@/errors"
-import { BaseModel, ModelType, Validator } from "@/index"
-import { format as formatDate, toZonedTime } from "date-fns-tz"
+import dayjs from "dayjs"
 import { Decimal } from "decimal.js"
+import { BaseModel, ModelType } from "../models"
+import { fieldSettings } from "../settings"
+import { Validator } from "../validators"
 import { Field, FieldOptions } from "./base"
 import { fieldDecorator } from "./fieldDecorator"
 
@@ -43,56 +45,83 @@ export class BooleanField extends Field<boolean> {
 }
 export const booleanField = fieldDecorator(BooleanField)
 
-export type TimestampFieldOptions = FieldOptions<Date> & { format?: string; timeZone?: string }
-export class TimestampField extends Field<Date> {
-  static defaultValidators: Validator[] = [(v) => v instanceof Date || "Must be a Date"]
-  static defaultTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
+export type BaseDatetimeFieldOptions<T> = FieldOptions<T> & {
+  format?: "timestamp" | "datetime" | "date" | (string & NonNullable<unknown>)
+  timezone?: string
+}
+export class BaseDatetimeField<T> extends Field<T> {
+  format!: BaseDatetimeFieldOptions<T>["format"]
+  timezone!: string | null
 
-  timeZone!: string
-
-  init(options?: TimestampFieldOptions) {
+  init(options?: BaseDatetimeFieldOptions<T>) {
     super.init(options)
-    this.timeZone = options?.timeZone || (this.constructor as typeof TimestampField).defaultTimeZone
+    this.format = options?.format || "datetime"
+    this.timezone = options?.timezone ?? fieldSettings.defaultTimezone
+  }
+}
+
+function setDayjsTz(d: dayjs.Dayjs, tz: string): dayjs.Dayjs {
+  if (!(d as any).tz) throw new Error("Date is not timezone aware, please ensure you have extend timezone plugin")
+  return (d as any).tz(tz)
+}
+
+export class TimestampField extends BaseDatetimeField<number> {
+  static defaultValidators: Validator[] = [(v) => typeof v === "number" || "Must be a timestamp"]
+
+  toInternalValue(data: any): number {
+    let d = dayjs(typeof data === "number" ? data : data instanceof Date ? data.getTime() : Date.parse(data))
+    if (this.timezone) d = setDayjsTz(d, this.timezone)
+    return d.valueOf()
   }
 
-  toInternalValue(data: any) {
-    if (data instanceof Date) return data
-    return new Date(data)
-  }
-
-  toRepresentation(data: Date): any {
-    return toZonedTime(data, this.timeZone).getTime()
+  toRepresentation(data: number) {
+    let d = dayjs(data)
+    if (this.timezone) d = setDayjsTz(d, this.timezone)
+    switch (this.format) {
+      case "timestamp":
+        return d.valueOf()
+      case "datetime":
+        return d.format("YYYY-MM-DDTHH:mm:ss.SSSZ[Z]")
+      case "date":
+        return d.format("YYYY-MM-DD")
+      default:
+        return d.format(this.format)
+    }
   }
 
   get default() {
-    return new Date()
+    return dayjs().valueOf()
   }
 }
 export const timestampField = fieldDecorator(TimestampField)
 
-export type DateTimeFieldOptions = TimestampFieldOptions & { format?: string }
-export class DateTimeField extends TimestampField {
-  static defaultValidators: Validator[] = [(v) => v instanceof Date || "Must be a Date"]
-  static defaultFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS"
-  static defaultTimeZone = TimestampField.defaultTimeZone
+export class DateField extends BaseDatetimeField<dayjs.Dayjs> {
+  static defaultValidators: Validator[] = [(v) => dayjs.isDayjs(v) || "Must be a Date"]
 
-  format!: string
-
-  init(options?: DateTimeFieldOptions) {
-    super.init(options)
-    this.format = options?.format || (this.constructor as typeof DateTimeField).defaultFormat
+  toInternalValue(data: any) {
+    let d = dayjs(data instanceof Date ? data : new Date(data))
+    if (this.timezone) d = setDayjsTz(d, this.timezone)
+    return d
   }
 
-  toRepresentation(data: Date): any {
-    return formatDate(toZonedTime(data, this.timeZone), this.format)
+  toRepresentation(data: dayjs.Dayjs): any {
+    let d = data
+    if (this.timezone) d = setDayjsTz(d, this.timezone)
+    switch (this.format) {
+      case "timestamp":
+        return d.valueOf()
+      case "datetime":
+        return d.format("YYYY-MM-DDTHH:mm:ss.SSSZ[Z]")
+      case "date":
+        return d.format("YYYY-MM-DD")
+      default:
+        return d.format(this.format)
+    }
   }
-}
-export const dateTimeField = fieldDecorator(DateTimeField)
 
-export class DateField extends DateTimeField {
-  static defaultValidators: Validator[] = [(v) => v instanceof Date || "Must be a Date"]
-  static defaultFormat = "yyyy-MM-dd"
-  static defaultTimeZone = DateTimeField.defaultTimeZone
+  get default() {
+    return dayjs()
+  }
 }
 export const dateField = fieldDecorator(DateField)
 
@@ -135,6 +164,10 @@ export class EnumField<T> extends Field<T> {
 export const enumField = fieldDecorator(EnumField)
 
 export type ModelFieldOptions<T extends BaseModel = BaseModel> = FieldOptions<T> & { type?: ModelType<T> }
+/**
+ * @example
+ * (ModelField<User>).init({ type: User })
+ */
 export class ModelField<T extends BaseModel> extends Field<T> {
   static defaultValidators: Validator[] = [
     (v) => v instanceof Object || "Must be a model",

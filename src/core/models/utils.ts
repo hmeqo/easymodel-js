@@ -20,3 +20,11 @@ export function modelToRaw<T = any>(model: BaseModel): T {
   }
   return rawObj as T
 }
+
+export function assignModel<T extends BaseModel>(model: T, data: any) {
+  Object.assign(model, getConstructor<typeof BaseModel>(model).toInternalValue(data))
+}
+
+export function isModel(value: any): value is BaseModel {
+  return !!value.toRepresentation
+}

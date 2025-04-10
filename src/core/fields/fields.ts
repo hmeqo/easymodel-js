@@ -81,7 +81,7 @@ export class TimestampField extends BaseDatetimeField<number> {
       case "timestamp":
         return d.valueOf()
       case "datetime":
-        return d.format("YYYY-MM-DDTHH:mm:ss.SSSZ[Z]")
+        return d.format("YYYY-MM-DDTHH:mm:ss.SSSZ")
       case "date":
         return d.format("YYYY-MM-DD")
       default:

@@ -15,5 +15,5 @@ export class User extends Model {
 
 export class UserSet extends ModelSet.fromModel(User) {}
 
-export const datetimePattern = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}[+-]\d{2}:\d{2}Z/
+export const datetimePattern = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}([+-]\d{2}:\d{2}|Z)/
 export const datePattern = /\d{4}-\d{2}-\d{2}/

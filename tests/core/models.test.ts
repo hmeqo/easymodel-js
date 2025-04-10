@@ -1,5 +1,5 @@
 import { IntegerField, isModel, Model, ModelSet, modelToRaw, StringField } from "@/index"
-import { User, UserSet } from "./models"
+import { datetimePattern, User, UserSet } from "./models"
 
 test("Test Model", () => {
   const user = User.init({ name: "Eugene Reese" })
@@ -8,7 +8,7 @@ test("Test Model", () => {
     name: "Eugene Reese",
     age: 999,
     email: "",
-    created_at: expect.stringMatching(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}[+-]\d{2}:\d{2}Z/)
+    created_at: expect.stringMatching(datetimePattern)
   })
 
   class NewUser extends User.exclude("id", "email", "created_at").include({

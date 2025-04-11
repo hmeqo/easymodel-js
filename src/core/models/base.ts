@@ -137,6 +137,16 @@ export class Model extends BaseModel {
     } as any
   }
 
+  static pick<ThisT, KeyT extends keyof ThisT = keyof ThisT>(
+    this: { new (): ThisT },
+    ...fields: KeyT[]
+  ): ModelType<ThisT, typeof Model> {
+    const ModelClass = this as unknown as typeof Model
+    return class extends ModelClass {
+      static fields = Object.fromEntries(Object.entries(ModelClass.fields).filter(([k]) => fields.includes(k as KeyT)))
+    } as any
+  }
+
   override toRepresentation() {
     return (this.constructor as typeof Model).toRepresentation(this)
   }

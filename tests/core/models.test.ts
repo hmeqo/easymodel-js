@@ -18,11 +18,16 @@ test("Test Model", () => {
   }) {
     age = "998"
   }
+
   expect(NewUser.init().nickname.toLowerCase()).toEqual("nickname")
   expect(NewUser.init().toRepresentation()).toEqual({ name: "", age: "998", nickname: "Nickname", subscribe: [] })
 
   expect(Model.isModel(user)).toBe(true)
   expect(isModel(user)).toBe(true)
+
+  class AUser extends User.pick("name") {}
+
+  expect(AUser.init({ name: "Eugene Reese" }).toRepresentation()).toEqual({ name: "Eugene Reese" })
 })
 
 test("Test ModelSet", () => {

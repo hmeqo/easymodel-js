@@ -1,6 +1,6 @@
 {
   "name": "@hmeqo/easymodel",
-  "version": "0.1.0-beta.13",
+  "version": "0.1.0-beta.14",
   "publishConfig": {
     "access": "public",
     "tag": "latest"

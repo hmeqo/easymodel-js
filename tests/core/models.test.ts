@@ -13,14 +13,26 @@ test("Test Model", () => {
 
   class NewUser extends User.exclude("id", "email", "created_at").include({
     nickname: StringField.init({ default: "Nickname" }),
-    age: StringField.init(),
-    subscribe: IntegerField.init({ many: true })
+    subscribe: IntegerField.init({ many: true }),
+    phone_number: StringField.init({ default: "998" })
   }) {
-    age = "998"
+    name = "John Doe"
+
+    getName() {
+      return this.name
+    }
   }
 
+  expect(NewUser.init().getName()).toEqual("John Doe")
   expect(NewUser.init().nickname.toLowerCase()).toEqual("nickname")
-  expect(NewUser.init().toRepresentation()).toEqual({ name: "", age: "998", nickname: "Nickname", subscribe: [] })
+  expect(NewUser.init().phone_number).toEqual("998")
+  expect(NewUser.init().toRepresentation()).toEqual({
+    name: "John Doe",
+    age: 999,
+    nickname: "Nickname",
+    subscribe: [],
+    phone_number: "998"
+  })
 
   expect(Model.isModel(user)).toBe(true)
   expect(isModel(user)).toBe(true)

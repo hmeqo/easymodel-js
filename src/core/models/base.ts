@@ -6,7 +6,7 @@ import { assignModel, isModel } from "./utils"
 
 export type ModelType<T = any, Base extends typeof BaseModel = typeof BaseModel> = Omit<Base, "init"> & {
   new (): T
-  init: ((data?: any) => T) & Base["init"]
+  init: Base["init"]
 } & Serializer
 
 export type ModelInst<T extends ModelType> = T extends ModelType<infer Type> ? Type : never
@@ -80,9 +80,12 @@ export class Model extends BaseModel {
 
   declare errors?: Record<string, any>
 
-  static override init<T extends Model>(this: { new (): T }, data?: ModelData<T>) {
+  static override init<T extends Model, CT extends typeof Model = typeof Model>(
+    this: CT & { new (): T },
+    data?: ModelData<T>
+  ) {
     const inst = new this()
-    for (const [name, field] of Object.entries((this as unknown as typeof Model).fields)) {
+    for (const [name, field] of Object.entries(this.fields)) {
       if ((inst as any)[name] === undefined) (inst as any)[name] = field.default
     }
     if (data) assignModel(inst, data)
@@ -117,34 +120,37 @@ export class Model extends BaseModel {
     return errors
   }
 
-  static exclude<ThisT, KeyT extends keyof ThisT = keyof ThisT>(
-    this: { new (): ThisT },
+  static exclude<ThisT, CT extends typeof Model, KeyT extends keyof ThisT = keyof ThisT>(
+    this: CT & { new (): ThisT },
     ...fields: KeyT[]
-  ): ModelType<Omit<ThisT, KeyT>, typeof Model> {
-    const ModelClass = this as unknown as typeof Model
-    return class extends ModelClass {
-      static fields = Object.fromEntries(Object.entries(ModelClass.fields).filter(([k]) => !fields.includes(k as KeyT)))
-    } as any
+  ): ModelType<ThisT, CT> {
+    const oFields = this.fields
+    class ExcludeModel extends (this as typeof Model) {
+      static fields = Object.fromEntries(Object.entries(oFields).filter(([k]) => !fields.includes(k as KeyT)))
+    }
+    return ExcludeModel as any
   }
 
-  static include<ThisT, Fields extends Record<string, Field>>(
-    this: { new (): ThisT },
+  static include<ThisT, CT extends typeof Model, Fields extends Record<string, Field>>(
+    this: CT & { new (): ThisT },
     fields: Fields
-  ): ModelType<Omit<ThisT, keyof Fields> & UnwrapFields<Fields>, typeof Model> {
-    const ModelClass = this as unknown as typeof Model
-    return class extends ModelClass {
-      static fields = { ...ModelClass.fields, ...fields }
-    } as any
+  ): ModelType<Omit<ThisT, keyof Fields> & UnwrapFields<Fields>, CT> {
+    const oFields = this.fields
+    class IncludeModel extends (this as typeof Model) {
+      static fields = { ...oFields, ...fields }
+    }
+    return IncludeModel as any
   }
 
-  static pick<ThisT, KeyT extends keyof ThisT = keyof ThisT>(
-    this: { new (): ThisT },
+  static pick<ThisT, CT extends typeof Model, KeyT extends keyof ThisT = keyof ThisT>(
+    this: CT & { new (): ThisT },
     ...fields: KeyT[]
-  ): ModelType<ThisT, typeof Model> {
-    const ModelClass = this as unknown as typeof Model
-    return class extends ModelClass {
-      static fields = Object.fromEntries(Object.entries(ModelClass.fields).filter(([k]) => fields.includes(k as KeyT)))
-    } as any
+  ): ModelType<ThisT, CT> {
+    const oFields = this.fields
+    class PickModel extends (this as typeof Model) {
+      static fields = Object.fromEntries(Object.entries(oFields).filter(([k]) => fields.includes(k as KeyT)))
+    }
+    return PickModel as any
   }
 
   override toRepresentation() {

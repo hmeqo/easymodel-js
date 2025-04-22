@@ -1,20 +1,22 @@
-import { IntegerField, isModel, Model, ModelSet, modelToRaw, StringField } from "@/index"
+import { IntField, isModel, Model, ModelSet, modelToRaw, StrField } from "@/index"
 import { datetimePattern, User, UserSet } from "./models"
 
 test("Test Model", () => {
   const user = User.init({ name: "Eugene Reese" })
+
   expect(user.name).toEqual("Eugene Reese")
   expect(user.toRepresentation()).toEqual({
     name: "Eugene Reese",
     age: 999,
     email: "",
-    created_at: expect.stringMatching(datetimePattern)
+    created_at: expect.stringMatching(datetimePattern),
+    address: null
   })
 
   class NewUser extends User.exclude("id", "email", "created_at").include({
-    nickname: StringField.init({ default: "Nickname" }),
-    subscribe: IntegerField.init({ many: true }),
-    phone_number: StringField.init({ default: "998" })
+    nickname: StrField.init({ default: "Nickname" }),
+    subscribe: IntField.init({ many: true }),
+    phone_number: StrField.init({ default: "998" })
   }) {
     name = "John Doe"
 
@@ -26,12 +28,13 @@ test("Test Model", () => {
   expect(NewUser.init().getName()).toEqual("John Doe")
   expect(NewUser.init().nickname.toLowerCase()).toEqual("nickname")
   expect(NewUser.init().phone_number).toEqual("998")
-  expect(NewUser.init().toRepresentation()).toEqual({
+  expect(NewUser.init({ address: "Address" }).toRepresentation()).toEqual({
     name: "John Doe",
     age: 999,
     nickname: "Nickname",
     subscribe: [],
-    phone_number: "998"
+    phone_number: "998",
+    address: "Address"
   })
 
   expect(Model.isModel(user)).toBe(true)

@@ -7,16 +7,19 @@ import { Validator } from "../validators"
 import { Field, FieldOptions } from "./base"
 import { fieldDecorator } from "./fieldDecorator"
 
-export class StringField extends Field<string> {
+export class AnyField extends Field<any> {}
+export const anyField = fieldDecorator(AnyField)
+
+export class StrField extends Field<string> {
   static defaultValidators: Validator[] = [(v) => typeof v === "string" || "Must be a string"]
 
   get default() {
     return ""
   }
 }
-export const stringField = fieldDecorator(StringField)
+export const strField = fieldDecorator(StrField)
 
-export class IntegerField extends Field<number> {
+export class IntField extends Field<number> {
   static defaultValidators: Validator[] = [
     (v) => (typeof v === "number" && Number.isInteger(v)) || "Must be an integer"
   ]
@@ -25,7 +28,7 @@ export class IntegerField extends Field<number> {
     return 0
   }
 }
-export const integerField = fieldDecorator(IntegerField)
+export const intField = fieldDecorator(IntField)
 
 export class FloatField extends Field<number> {
   static defaultValidators: Validator[] = [(v) => typeof v === "number" || "Must be a float"]
@@ -36,14 +39,14 @@ export class FloatField extends Field<number> {
 }
 export const floatField = fieldDecorator(FloatField)
 
-export class BooleanField extends Field<boolean> {
+export class BoolField extends Field<boolean> {
   static defaultValidators: Validator[] = [(v) => typeof v === "boolean" || "Must be a boolean"]
 
   get default() {
     return false
   }
 }
-export const booleanField = fieldDecorator(BooleanField)
+export const boolField = fieldDecorator(BoolField)
 
 export type BaseDatetimeFieldOptions<T> = FieldOptions<T> & {
   format?: "timestamp" | "datetime" | "date" | (string & NonNullable<unknown>)

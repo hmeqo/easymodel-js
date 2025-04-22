@@ -104,6 +104,10 @@ export class Field<T = any> implements Serializer {
     }
   }
 
+  getDefault() {
+    return this.nullable ? null : this.default
+  }
+
   get default(): T {
     return undefined as T
   }

@@ -15,7 +15,7 @@ export class BaseModel {
   /**
    * An object containing any validation errors found.
    */
-  errors?: any
+  declare errors?: any
 
   /**
    * Creates a new instance of the class using the provided data.
@@ -86,7 +86,7 @@ export class Model extends BaseModel {
   ) {
     const inst = new this()
     for (const [name, field] of Object.entries(this.fields)) {
-      if ((inst as any)[name] === undefined) (inst as any)[name] = field.default
+      if ((inst as any)[name] === undefined) (inst as any)[name] = field.getDefault()
     }
     if (data) assignModel(inst, data)
     return inst

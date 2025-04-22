@@ -1,35 +1,51 @@
 import {
-  booleanField,
+  AnyField,
+  anyField,
+  boolField,
   dateField,
   DateField,
   enumField,
   EnumField,
   floatField,
-  integerField,
+  intField,
   Model,
-  stringField,
+  strField,
   TimestampField,
   timestampField
 } from "@/core"
-import { IntegerField, StringField } from "@/index"
+import { IntField, StrField } from "@/index"
 import dayjs from "dayjs"
 import { datePattern, datetimePattern } from "./models"
 
+test("Test AnyField", () => {
+  class Test extends Model {
+    @anyField v1!: any
+    @anyField v2: string = ""
+  }
+  const field1 = Test.fields.v1 as AnyField
+  const field2 = Test.fields.v2 as AnyField
+  expect(field1.getDefault()).toBeNull()
+  expect(field2.getDefault()).toBeUndefined()
+
+  expect(field1.toRepresentation(field1.getDefault())).toBeNull()
+  expect(field2.toRepresentation(field2.getDefault())).toBeUndefined()
+})
+
 test("Test EnumStringField", () => {
   class Test extends Model {
-    @stringField({ readonly: true }) label!: string
+    @strField({ readonly: true }) label!: string
   }
-  const field = Test.fields.label as StringField
-  expect(field.default).toEqual("")
+  const field = Test.fields.label as StrField
+  expect(field.getDefault()).toEqual("")
   expect(Test.init().toRepresentation()).toEqual({})
 })
 
 test("Test IntegerField", () => {
   class Test extends Model {
-    @integerField count!: number
+    @intField count!: number
   }
-  const field = Test.fields.count as IntegerField
-  expect(field.default).toEqual(0)
+  const field = Test.fields.count as IntField
+  expect(field.getDefault()).toEqual(0)
 })
 
 test("Test FloatField", () => {
@@ -42,7 +58,7 @@ test("Test FloatField", () => {
 
 test("Test BooleanField", () => {
   class Test extends Model {
-    @booleanField flag!: number
+    @boolField flag!: number
   }
   expect(Test.init()).toEqual({ flag: false })
 })
@@ -57,7 +73,7 @@ test("Test EnumField", () => {
     @enumField({ type: TE, default: () => TE.A }) te!: TE
   }
   const field = Test.fields.te as EnumField<TE>
-  expect(field.default).toEqual(TE.A)
+  expect(field.getDefault()).toEqual(TE.A)
   expect(field.runValidators(TE.A)).toBeUndefined()
   expect(field.runValidators("d")).not.toBeUndefined()
   expect(Test.init()).toEqual({ te: TE.A })
@@ -74,11 +90,11 @@ test("Test TimestampField and DateField", () => {
   const field2 = Test.fields.datetime as DateField
   const field3 = Test.fields.date as DateField
 
-  expect(typeof field1.default).toEqual("number")
-  expect(typeof field2.default).toEqual("object")
-  expect(typeof field3.default).toEqual("object")
+  expect(typeof field1.getDefault()).toEqual("number")
+  expect(typeof field2.getDefault()).toEqual("object")
+  expect(typeof field3.getDefault()).toEqual("object")
 
-  expect(field1.toRepresentation(field1.default)).toMatch(datetimePattern)
-  expect(field2.toRepresentation(field2.default)).toMatch(datetimePattern)
-  expect(field3.toRepresentation(field3.default)).toMatch(datePattern)
+  expect(field1.toRepresentation(field1.getDefault()!)).toMatch(datetimePattern)
+  expect(field2.toRepresentation(field2.getDefault()!)).toMatch(datetimePattern)
+  expect(field3.toRepresentation(field3.getDefault()!)).toMatch(datePattern)
 })

@@ -4,10 +4,10 @@ import dayjs from "dayjs"
 export class User extends Model {
   @intField({ readonly: true }) id!: number
   @strField name!: string
-  @strField({ validators: [(v) => /^\S+@\S+\.\S+$/.test(v) || "Invalid email"] }) email!: string
+  @strField email!: string
   @intField age: number = 999
   @dateField created_at!: dayjs.Dayjs
-  @strField({ nullable: true }) address!: string | null
+  @strField address!: string | null
 
   whoAmI() {
     return `I'm ${this.name}`

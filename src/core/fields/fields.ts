@@ -3,16 +3,13 @@ import dayjs from "dayjs"
 import { Decimal } from "decimal.js"
 import { BaseModel, ModelType } from "../models"
 import { fieldSettings } from "../settings"
-import { Validator } from "../validators"
 import { Field, FieldOptions } from "./base"
 import { fieldDecorator } from "./fieldDecorator"
 
-export class AnyField extends Field<any> {}
+export class AnyField<T = any> extends Field<T> {}
 export const anyField = fieldDecorator(AnyField)
 
 export class StrField extends Field<string> {
-  static defaultValidators: Validator[] = [(v) => typeof v === "string" || "Must be a string"]
-
   get default() {
     return ""
   }
@@ -20,10 +17,6 @@ export class StrField extends Field<string> {
 export const strField = fieldDecorator(StrField)
 
 export class IntField extends Field<number> {
-  static defaultValidators: Validator[] = [
-    (v) => (typeof v === "number" && Number.isInteger(v)) || "Must be an integer"
-  ]
-
   get default() {
     return 0
   }
@@ -31,8 +24,6 @@ export class IntField extends Field<number> {
 export const intField = fieldDecorator(IntField)
 
 export class FloatField extends Field<number> {
-  static defaultValidators: Validator[] = [(v) => typeof v === "number" || "Must be a float"]
-
   get default() {
     return 0
   }
@@ -40,8 +31,6 @@ export class FloatField extends Field<number> {
 export const floatField = fieldDecorator(FloatField)
 
 export class BoolField extends Field<boolean> {
-  static defaultValidators: Validator[] = [(v) => typeof v === "boolean" || "Must be a boolean"]
-
   get default() {
     return false
   }
@@ -69,8 +58,6 @@ function setDayjsTz(d: dayjs.Dayjs, tz: string): dayjs.Dayjs {
 }
 
 export class TimestampField extends BaseDatetimeField<number> {
-  static defaultValidators: Validator[] = [(v) => typeof v === "number" || "Must be a timestamp"]
-
   toInternalValue(data: any): number {
     let d = dayjs(typeof data === "number" ? data : data instanceof Date ? data.getTime() : Date.parse(data))
     if (this.timezone) d = setDayjsTz(d, this.timezone)
@@ -99,8 +86,6 @@ export class TimestampField extends BaseDatetimeField<number> {
 export const timestampField = fieldDecorator(TimestampField)
 
 export class DateField extends BaseDatetimeField<dayjs.Dayjs> {
-  static defaultValidators: Validator[] = [(v) => dayjs.isDayjs(v) || "Must be a Date"]
-
   toInternalValue(data: any) {
     let d = dayjs(data instanceof Date ? data : new Date(data))
     if (this.timezone) d = setDayjsTz(d, this.timezone)
@@ -129,8 +114,6 @@ export class DateField extends BaseDatetimeField<dayjs.Dayjs> {
 export const dateField = fieldDecorator(DateField)
 
 export class DecimalField extends Field<Decimal> {
-  static defaultValidators: Validator[] = [(v) => v instanceof Decimal || "Must be a decimal"]
-
   toInternalValue(data: any): Decimal {
     if (data instanceof Decimal) return data
     return new Decimal(data)
@@ -148,10 +131,6 @@ export const decimalField = fieldDecorator(DecimalField)
 
 export type EnumFieldOptions<T = any> = FieldOptions<T> & { type: any }
 export class EnumField<T> extends Field<T> {
-  static defaultValidators: Validator[] = [
-    (v, f) => Object.values(f.type).includes(v) || "Must be one of the enum values"
-  ]
-
   declare type: any
 
   init(options?: EnumFieldOptions<T>) {
@@ -172,11 +151,6 @@ export type ModelFieldOptions<T extends BaseModel = BaseModel> = FieldOptions<T>
  * (ModelField<User>).init({ type: User })
  */
 export class ModelField<T extends BaseModel> extends Field<T> {
-  static defaultValidators: Validator[] = [
-    (v) => v instanceof Object || "Must be a model",
-    (v: BaseModel) => v.runValidators() || true
-  ]
-
   declare type: ModelType<T>
 
   init(options?: ModelFieldOptions<T>) {

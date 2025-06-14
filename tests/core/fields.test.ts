@@ -74,8 +74,6 @@ test("Test EnumField", () => {
   }
   const field = Test.fields.te as EnumField<TE>
   expect(field.getDefault()).toEqual(TE.A)
-  expect(field.runValidators(TE.A)).toBeUndefined()
-  expect(field.runValidators("d")).not.toBeUndefined()
   expect(Test.init()).toEqual({ te: TE.A })
 })
 

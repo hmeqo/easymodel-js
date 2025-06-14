@@ -1,7 +1,6 @@
 import "reflect-metadata"
 import { Model } from "../models"
 import { Serializer } from "../serializers"
-import { ValidateErrorType, Validator } from "../validators"
 
 export type FieldType<T, OptsT> = {
   new (): Field<T> & { init: (options?: OptsT) => void }
@@ -10,7 +9,6 @@ export type FieldType<T, OptsT> = {
 export type FieldOptions<T = any> = {
   source?: string
   type?: unknown
-  validators?: Validator<T>[]
   nullable?: boolean
   readonly?: boolean
   many?: boolean | ListFieldOptions<T>
@@ -19,11 +17,9 @@ export type FieldOptions<T = any> = {
 
 export class Field<T = any> implements Serializer {
   static fieldOptions?: FieldOptions
-  static defaultValidators: Validator[] = []
 
   source?: string
   type?: any
-  validators?: Validator<T>[]
   nullable?: boolean
   readonly?: boolean
 
@@ -41,7 +37,6 @@ export class Field<T = any> implements Serializer {
 
   init(options?: FieldOptions<T>) {
     this.source = options?.source ?? this.source
-    this.validators = options?.validators ?? this.validators
     this.nullable = options?.nullable ?? this.nullable
     this.readonly = options?.readonly ?? this.readonly
     if (options?.default)
@@ -90,20 +85,6 @@ export class Field<T = any> implements Serializer {
     obj[this.source ?? name] = value
   }
 
-  /**
-   * Runs the validators for the given value and returns any validation errors found.
-   */
-  runValidators(value: any) {
-    if (value === null || value === undefined) {
-      if (this.nullable) return
-      throw new Error("Value cannot be null")
-    }
-    for (const validator of [...(this.constructor as typeof Field).defaultValidators, ...(this.validators || [])]) {
-      const trueOrError = validator(value, this)
-      if (trueOrError !== true) return trueOrError
-    }
-  }
-
   getDefault() {
     return this.nullable ? null : this.default
   }
@@ -116,7 +97,6 @@ export class Field<T = any> implements Serializer {
 export type ListFieldOptions<T = any> = FieldOptions<T[]> & { child?: Field<T> }
 
 export class ListField<T> extends Field<T[]> {
-  static defaultValidators: Validator[] = [(v) => Array.isArray(v) || "Must be an array"]
   static defaultChild: Field = new Field()
 
   child!: Field<T>
@@ -130,19 +110,6 @@ export class ListField<T> extends Field<T[]> {
   init(options?: ListFieldOptions<T>) {
     super.init(options)
     this.child = options?.child ?? this.child ?? (this.constructor as typeof ListField).defaultChild
-  }
-
-  runValidators(value: any[]) {
-    if (value === null || value === undefined) {
-      if (this.nullable) return
-      throw new Error("Value cannot be null")
-    }
-    const errors: Record<string, ValidateErrorType> = {}
-    for (const [index, i] of Object.entries(value)) {
-      const error = this.child.runValidators(i)
-      if (error !== undefined) errors[index] = i
-    }
-    return errors
   }
 
   get default(): T[] {

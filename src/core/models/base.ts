@@ -1,7 +1,6 @@
 import { NotImplementedError, assert_ok } from "@/errors"
 import { Field } from "../fields"
 import { Serializer } from "../serializers"
-import { ValidateErrorType } from "../validators"
 import { assignModel, isModel } from "./utils"
 
 export type ModelType<T = any, Base extends typeof BaseModel = typeof BaseModel> = Omit<Base, "init"> & {
@@ -12,11 +11,6 @@ export type ModelType<T = any, Base extends typeof BaseModel = typeof BaseModel>
 export type ModelInst<T extends ModelType> = T extends ModelType<infer Type> ? Type : never
 
 export class BaseModel {
-  /**
-   * An object containing any validation errors found.
-   */
-  declare errors?: any
-
   /**
    * Creates a new instance of the class using the provided data.
    */
@@ -32,30 +26,8 @@ export class BaseModel {
     throw new NotImplementedError()
   }
 
-  /**
-   * Runs the validators for each field in the model and returns any errors found.
-   */
-  static runValidators(value: any): any {
-    throw new NotImplementedError()
-  }
-
   toRepresentation() {
     return (this.constructor as typeof BaseModel).toRepresentation(this)
-  }
-
-  /**
-   * Runs the validators for the current model instance and returns any validation errors found.
-   */
-  runValidators(): ValidateErrorType | undefined {
-    return (this.constructor as typeof BaseModel).runValidators(this)
-  }
-
-  /**
-   * Validates the current instance whether the instance is valid or not.
-   */
-  validate(): boolean {
-    this.errors = this.runValidators()
-    return !Object.keys(this.errors ?? {}).length
   }
 
   static isModel(obj: any): obj is BaseModel {
@@ -77,8 +49,6 @@ export type ModelData<T extends Model> = Partial<ModelFields<T>> & Record<string
  */
 export class Model extends BaseModel {
   static fields: Record<string, Field> = {}
-
-  declare errors?: Record<string, any>
 
   static override init<T extends Model, CT extends typeof Model = typeof Model>(
     this: CT & { new (): T },
@@ -106,18 +76,6 @@ export class Model extends BaseModel {
       field.setRepresentationToObj(obj, name, data)
     }
     return obj
-  }
-
-  static override runValidators(value: any) {
-    const errors: Record<string, any> = {}
-    for (const [name, field] of Object.entries(this.fields)) {
-      let error
-      if ((error = field.runValidators(value[name])) !== undefined) {
-        errors[name] = error
-      }
-    }
-    if (!Object.keys(errors).length) return
-    return errors
   }
 
   static exclude<ThisT, CT extends typeof Model, KeyT extends keyof ThisT = keyof ThisT>(
@@ -157,15 +115,6 @@ export class Model extends BaseModel {
     return (this.constructor as typeof Model).toRepresentation(this)
   }
 
-  override runValidators() {
-    return (this.constructor as typeof Model).runValidators(this)
-  }
-
-  override validate(): boolean {
-    this.errors = this.runValidators()
-    return !Object.keys(this.errors ?? {}).length
-  }
-
   static isModel(obj: any): obj is Model {
     return isModel(obj)
   }
@@ -176,7 +125,6 @@ export class Model extends BaseModel {
  */
 export class ModelSet<T extends BaseModel = BaseModel> extends Array<T> implements BaseModel {
   declare static model: ModelType
-  declare errors?: ValidateErrorType[]
 
   static init<T extends ModelSet>(this: { new (): T }, data?: any[]) {
     const inst = new this()
@@ -193,23 +141,8 @@ export class ModelSet<T extends BaseModel = BaseModel> extends Array<T> implemen
     return data.map((x) => x.toRepresentation())
   }
 
-  static runValidators(value: ModelSet) {
-    const errors = value.map((x) => x.runValidators()).filter((x) => x !== undefined) as ValidateErrorType[]
-    if (!Object.keys(errors).length) return
-    return errors
-  }
-
   toRepresentation() {
     return (this.constructor as typeof ModelSet).toRepresentation(this)
-  }
-
-  runValidators() {
-    return (this.constructor as typeof ModelSet).runValidators(this)
-  }
-
-  validate(): boolean {
-    this.errors = this.runValidators()
-    return !Object.keys(this.errors ?? {}).length
   }
 
   /**
